@@ -7,3 +7,13 @@ SecurityEvent
 | distinct Computer, LogSource = extract("virtualmachines/([^/]+)", 1, _ResourceId)
 | sort by Computer desc
 
+//Check for duplicates in multiple tables for Windows endpoints
+let timeRange = 1d;
+let logs = union withsource=TableName
+    SecurityEvent,
+    Event
+| where TimeGenerated > ago(timeRange);
+logs
+| summarize Count = count() by Computer, TimeGenerated, EventData, _ResourceId, TableName
+| where Count > 1
+| distinct Computer, LogSource = extract("virtualmachines/([^/]+)", 1, _ResourceId), TableName
