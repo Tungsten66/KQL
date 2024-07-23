@@ -4,4 +4,5 @@ SecurityEvent
 | summarize Count = count() by Computer, TimeGenerated, EventData, _ResourceId
 | where Count > 1
 | distinct Computer, LogSource = extract("virtualmachines/([^/]+)", 1, _ResourceId)
+| sort by Computer desc
 
