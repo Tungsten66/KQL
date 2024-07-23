@@ -1,0 +1,7 @@
+//Check for duplicates in the SecurityEvent table
+//Added LogSource to identify if the logs are coming from different source such as a Windows Event Forwarder Collector
+SecurityEvent
+| summarize Count = count() by Computer, TimeGenerated, EventData, _ResourceId
+| where Count > 1
+| distinct Computer, LogSource = extract("virtualmachines/([^/]+)", 1, _ResourceId)
+
