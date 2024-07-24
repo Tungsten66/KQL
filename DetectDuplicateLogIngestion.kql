@@ -1,10 +1,8 @@
 //Check for duplicate log ingestion in the SecurityEvent table
-//Added LogSource to identify if the logs are coming from different source such as a Windows Event Collector
-//https://learn.microsoft.com/en-us/windows/win32/wec/windows-event-collector
 SecurityEvent
-| summarize Count = count() by Computer, TimeGenerated, EventData, _ResourceId
+| summarize Count = count() by Computer, TimeGenerated, EventData
 | where Count > 1
-| distinct Computer, LogSource = extract("virtualmachines/([^/]+)", 1, _ResourceId)
+| distinct Computer
 | sort by Computer desc
 
 //Check for duplicates in multiple tables for Windows endpoints
@@ -14,6 +12,6 @@ let logs = union withsource=TableName
     Event
 | where TimeGenerated > ago(timeRange);
 logs
-| summarize Count = count() by Computer, TimeGenerated, EventData, _ResourceId, TableName
+| summarize Count = count() by Computer, TimeGenerated, EventData, TableName
 | where Count > 1
-| distinct Computer, LogSource = extract("virtualmachines/([^/]+)", 1, _ResourceId), TableName
+| distinct Computer, TableName
