@@ -1,11 +1,11 @@
-//Check for duplicate log ingestion in the SecurityEvent table
+//Check for duplicate Windows Event log ingestion in the SecurityEvent table
 SecurityEvent
 | summarize Count = count() by Computer, TimeGenerated, EventData
 | where Count > 1
 | distinct Computer
 | sort by Computer desc
 
-//Check for duplicates in multiple tables for Windows endpoints
+//Check for duplicate Windows Event log ingestion in multiple tables for Windows endpoints
 let timeRange = 1d;
 let logs = union withsource=TableName
     SecurityEvent,
