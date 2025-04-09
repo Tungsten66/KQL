@@ -1,0 +1,7 @@
+// Report when the last policy was applied for each DeviceName with PolicyName abd PolicyID
+DeviceEvents
+| where ActionType contains "AppControlCodeIntegrityPolicyLoaded"
+| extend PolicyName = parsejson(AdditionalFields).PolicyName
+| extend PolicyID = parsejson(AdditionalFields).PolicyID
+| summarize LastTimeGenerated = arg_max(TimeGenerated, *) by DeviceName
+| project LastTimeGenerated, DeviceName, PolicyName, PolicyID
