@@ -1,4 +1,4 @@
-// Report when the last policy was applied for each DeviceName with PolicyName abd PolicyID
+// Report when the last policy was applied for each DeviceName with PolicyName and PolicyID
 DeviceEvents
 | where ActionType contains "AppControlCodeIntegrityPolicyLoaded"
 | extend PolicyName = parsejson(AdditionalFields).PolicyName
