@@ -3,5 +3,5 @@ DeviceEvents
 | where ActionType contains "AppControlCodeIntegrityPolicyLoaded"
 | extend PolicyName = parsejson(AdditionalFields).PolicyName
 | extend PolicyID = parsejson(AdditionalFields).PolicyID
-| summarize LastTimeGenerated = arg_max(TimeGenerated, *) by DeviceName
+| summarize LastTimeGenerated = arg_max(TimeStamp, *) by DeviceName
 | project LastTimeGenerated, DeviceName, PolicyName, PolicyID
