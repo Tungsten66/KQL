@@ -1,0 +1,8 @@
+// List all devices without a Platform update listed
+// If a Server, Defender feature may not be installed (check with PowerShell Get-WindowsFeature -name Windows-Defender)
+// If a client, Defender may be disabled by GPO (Navigate to HKLM\Software\Policies\Microsoft\Windows Defender and ensure DisableAntiSpyware is not present)
+DeviceTvmInfoGathering
+| extend AdditionalFields = parse_json(AdditionalFields)
+| extend AvPlatformVersion = tostring(AdditionalFields.["AvPlatformVersion"])
+| where OSPlatform startswith "Windows"
+| where parse_version(AvPlatformVersion) == parse_version("0.0.0.0")
