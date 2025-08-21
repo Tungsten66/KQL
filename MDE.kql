@@ -6,3 +6,17 @@ DeviceTvmInfoGathering
 | extend AvPlatformVersion = tostring(AdditionalFields.["AvPlatformVersion"])
 | where OSPlatform startswith "Windows"
 | where parse_version(AvPlatformVersion) == parse_version("0.0.0.0")
+
+// List devices from DeviceInfo table that "Can be onboarded" and join with  DeviceNetworkInfo table to also get the IP address.
+//This can be helpful to identify subnets/sites that may have network connectivity issues 
+DeviceInfo
+| where OnboardingStatus == "Can be onboarded"
+| join kind=inner (
+DeviceNetworkInfo
+| extend IPList = todynamic(IPAddresses)
+| mv-expand IPList
+| extend IPAddress = tostring(IPList.IPAddress)
+| project DeviceId, IPAddress
+) on DeviceId
+| summarize arg_max(Timestamp, *) by DeviceId
+| project DeviceId, Timestamp, IPAddress, OnboardingStatus
