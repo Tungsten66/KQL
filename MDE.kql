@@ -20,3 +20,10 @@ DeviceNetworkInfo
 ) on DeviceId
 | summarize arg_max(Timestamp, *) by DeviceId
 | project DeviceId, Timestamp, IPAddress, OnboardingStatus
+
+//Limit search in DeviceEvents table to only machines that are in the "Windows Clients" Device Group
+let DeviceGroup = DeviceInfo
+| where MachineGroup == "Windows Clients"
+| project DeviceId;
+DeviceEvents
+| where DeviceId in (DeviceGroup)
