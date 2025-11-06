@@ -1,0 +1,34 @@
+//Container Vulnerability Reporting
+//Modified original query from Microsoft Defender for Cloud | Workbooks | Vulnerability Assessment Findings
+//Added Evidence and Description
+securityresources
+| where type == "microsoft.security/assessments/subassessments"
+| extend assessmentKey = extract(".*assessments/(.+?)/.*", 1, id)
+| where assessmentKey == "33422d8f-ab1e-42be-bc9a-38685bb567b9"
+| extend status = tostring(parse_json(properties).status.code)
+| where status == 'Unhealthy'
+| extend Resource = tolower(extract(@'(?i)(.*?)/securityentitydata/([^/]+)', 1, id))
+| project
+    subscriptionId,
+    Resource,
+    ResourceGroup = trim_end("/", extract(".*resourceGroups/(.+?)/", 0, id)),
+    VulnId = tostring(parse_json(properties).id),
+    PublishedTime = format_datetime(todatetime(properties.additionalData.vulnerabilityDetails.publishedDate), 'MM/d/yyyy h:m:s tt'),
+    TimeGenerated = todatetime(properties.timeGenerated),
+    Status = tostring(parse_json(properties).status.code),
+    Severity = tostring(properties.additionalData.vulnerabilityDetails.severity),
+    Patchable = tostring(properties.additionalData.softwareDetails.fixStatus),
+    RepositoryName = tostring(properties.additionalData.artifactDetails.repositoryName),
+    CVSS2Score = tostring(properties.["additionalData"].["vulnerabilityDetails"].["cvss"].["3.0"].["base"]),
+    CVSS3Score = tostring(properties.["additionalData"].["vulnerabilityDetails"].["cvss"].["3.0"].["cvssVectorString"]),
+    ImageURI = tostring(properties.resourceDetails.id),
+    Description = tostring(properties.description),
+    Evidence = iff(
+        isnull(properties.additionalData.softwareDetails.evidence),
+        "",
+        strcat_array(todynamic(properties.additionalData.softwareDetails.evidence), " | ")
+    )
+| where Status == 'Unhealthy'
+| project-away Status
+| distinct subscriptionId, Resource, ResourceGroup, VulnId, PublishedTime, TimeGenerated, Severity, Patchable, RepositoryName, CVSS2Score, CVSS3Score, ImageURI,  Evidence, Description
+| top 1000 by CVSS2Score
