@@ -27,3 +27,18 @@ let DeviceGroup = DeviceInfo
 | project DeviceId;
 DeviceEvents
 | where DeviceId in (DeviceGroup)
+
+//The status of Microsoft Defender Antivirus detected on devices in your organization
+DeviceTvmInfoGathering
+| where isnotempty(AdditionalFields)
+| extend avdata = parsejson(AdditionalFields)
+| extend AVMode = case(
+    tostring(avdata["AvMode"]) == "0", "Active",
+    tostring(avdata["AvMode"]) == "1", "Passive",
+    tostring(avdata["AvMode"]) == "2", "Disabled",
+    tostring(avdata["AvMode"]) == "3", "Others",
+    tostring(avdata["AvMode"]) == "4", "EDR Blocked",
+    "Unknown"
+)
+| summarize Count = count() by AVMode
+| render piechart 
