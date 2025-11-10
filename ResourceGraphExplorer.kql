@@ -18,6 +18,10 @@ securityresources
     Status = tostring(parse_json(properties).status.code),
     Severity = tostring(properties.additionalData.vulnerabilityDetails.severity),
     Patchable = tostring(properties.additionalData.softwareDetails.fixStatus),
+    Vendor = tostring(properties.additionalData.softwareDetails.vendor),
+    PackageName = tostring(properties.additionalData.softwareDetails.packageName),
+    InstalledVersion = tostring(properties.additionalData.softwareDetails.version),
+    FixedVersion = tostring(properties.additionalData.softwareDetails.fixedVersion),
     RepositoryName = tostring(properties.additionalData.artifactDetails.repositoryName),
     CVSS2Score = tostring(properties.["additionalData"].["vulnerabilityDetails"].["cvss"].["3.0"].["base"]),
     CVSS3Score = tostring(properties.["additionalData"].["vulnerabilityDetails"].["cvss"].["3.0"].["cvssVectorString"]),
@@ -30,5 +34,5 @@ securityresources
     )
 | where Status == 'Unhealthy'
 | project-away Status
-| distinct subscriptionId, Resource, ResourceGroup, VulnId, PublishedTime, TimeGenerated, Severity, Patchable, RepositoryName, CVSS2Score, CVSS3Score, ImageURI,  Evidence, Description
+| distinct subscriptionId, Resource, ResourceGroup, VulnId, PublishedTime, TimeGenerated, Severity, Patchable, Vendor, PackageName, InstalledVersion, FixedVersion, RepositoryName, CVSS2Score, CVSS3Score, ImageURI,  Evidence, Description
 | top 1000 by CVSS2Score
