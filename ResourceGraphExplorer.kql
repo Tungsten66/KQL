@@ -36,3 +36,19 @@ securityresources
 | project-away Status
 | distinct subscriptionId, Resource, ResourceGroup, VulnId, PublishedTime, TimeGenerated, Severity, Patchable, Vendor, PackageName, InstalledVersion, FixedVersion, RepositoryName, CVSS2Score, CVSS3Score, ImageURI,  Evidence, Description
 | top 1000 by CVSS2Score
+
+// Show ComputerName first because Arc resource name defaults to AWS instance ID for AWS machines.
+// https://learn.microsoft.com/en-us/azure/azure-arc/servers/azcmagent-connect
+resources
+| where type == "microsoft.hybridcompute/machines"
+| extend ComputerName = coalesce(
+        tostring(properties.osProfile.computerName),
+        tostring(properties.machineFqdn),
+        tostring(properties.displayName)
+    ),
+        Status = tostring(properties.status),
+        LastStatusChange = tostring(properties.lastStatusChange),
+        AgentVersion = tostring(properties.agentVersion),
+        CloudProvider = tostring(properties.detectedProperties.cloudprovider)
+| project ComputerName, name, Status, LastStatusChange, AgentVersion, CloudProvider
+| order by ComputerName asc
